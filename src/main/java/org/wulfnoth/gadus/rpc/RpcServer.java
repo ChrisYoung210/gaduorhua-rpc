@@ -3,5 +3,8 @@ package org.wulfnoth.gadus.rpc;
 /**
  * @author Young
  */
-abstract public class RpcServer implements AutoCloseable {
+public abstract class RpcServer implements AutoCloseable {
+
+    public abstract RpcServer start();
+
 }

@@ -50,7 +50,9 @@ class KryoRpcEngine extends RpcEngine {
     * Kryo RPC引擎的Server端，用于接收、处理Client端的RPC请求
     * @param address  RPC Server绑定的本地地址
     */
-  private class KryoRpcServer(address: InetSocketAddress) extends RpcServerInScala(address) {
+  private class KryoRpcServer(address: InetSocketAddress,
+                             instance: scala.Any)
+    extends RpcServerInScala(address) {
 
     override def getInitializer: ChannelInitializer[SocketChannel] = {
       new ChannelInitializer[SocketChannel] {
@@ -61,12 +63,14 @@ class KryoRpcEngine extends RpcEngine {
             new SimpleChannelInboundHandler[KryoRequestWrapper] {
 
               override def channelActive(ctx: ChannelHandlerContext): Unit = {
-                //KryoRpcEngine.logger debug "build connection with " + ctx.channel().remoteAddress()
+                KryoRpcEngine.logger debug "build connection with " + ctx.channel.remoteAddress
                 super.channelActive(ctx)
               }
 
               override def channelRead0(ctx: ChannelHandlerContext,
-                                        msg: KryoRequestWrapper)= ??? /*{
+                                        msg: KryoRequestWrapper)= {
+
+              } /*{
                 try {
                   val instanceAndMethod = getInstanceAndMethod(msg getProtocolClass, msg getMethodId)
                   val response = instanceAndMethod._2.invoke(instanceAndMethod._1, msg getRequestParameters: _*)
@@ -106,8 +110,8 @@ class KryoRpcEngine extends RpcEngine {
 
   private class Invoker(address: InetSocketAddress,
                         protocol : Class[_],
-                        timeout: Long) extends
-    RpcInvocationHandler[KryoResponseWrapper] {
+                        timeout: Long)
+    extends RpcInvocationHandler[KryoResponseWrapper] {
 
     KryoRpcEngine.logger info "Creating new RPC server."
 
@@ -156,7 +160,9 @@ class KryoRpcEngine extends RpcEngine {
     * @param address 绑定的本地地址
     * @return a RPC Server instance
     */
-  override def getServer(address: InetSocketAddress, instance: scala.Any): RpcServer = ???
+  override def getServer(address: InetSocketAddress,
+                         instance: scala.Any) =
+    new KryoRpcServer(address, instance)
 }
 
 private object KryoRpcEngine {

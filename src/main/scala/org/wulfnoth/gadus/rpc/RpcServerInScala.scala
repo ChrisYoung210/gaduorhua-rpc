@@ -27,7 +27,7 @@ abstract class RpcServerInScala(address : InetSocketAddress,
       (bossGroup, workerGroup) channel
       classOf[NioServerSocketChannel] childHandler getInitializer
 
-  def start = {
+  override def start = {
     synchronized {
       channelFuture = server bind address sync()
     }
