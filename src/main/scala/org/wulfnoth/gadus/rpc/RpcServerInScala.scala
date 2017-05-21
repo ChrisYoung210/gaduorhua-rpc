@@ -1,4 +1,4 @@
-package com.young.gaduorhua.rpc
+package org.wulfnoth.gadus.rpc
 
 import java.net.InetSocketAddress
 
@@ -11,8 +11,8 @@ import io.netty.channel.{ChannelFuture, ChannelInitializer}
 /**
   * @author young
   */
-abstract class Server(address : InetSocketAddress,
-                      workerThreadN: Int = 8) extends AutoCloseable {
+abstract class RpcServerInScala(address : InetSocketAddress,
+                      workerThreadN: Int = 8) extends RpcServer {
 
   //def this(address: InetSocketAddress) = this(address, 8)
 
@@ -41,8 +41,6 @@ abstract class Server(address : InetSocketAddress,
       workerGroup.shutdownGracefully()
     }
   }
-
-  def addProtocolAndInstance[T <: AnyRef](clazz : Class[T], instance : T) : Boolean
 
   def getInitializer : ChannelInitializer[SocketChannel]
 }

@@ -1,18 +1,17 @@
-package com.young.gaduorhua.rpc.kryo
+package org.wulfnoth.gadus.rpc.kryo
 
 import java.lang.reflect.{InvocationTargetException, Method, Proxy}
 import java.net.InetSocketAddress
 
 import com.esotericsoftware.kryo.Kryo
 import com.young.commons.collection.BlockingHashMap
-import com.young.gaduorhua.rpc.{Client, RpcEngine, RpcInvocationHandler, Server}
-import com.young.gaduorhua.rpc.ImplicityInstance.methodOrder
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInitializer, SimpleChannelInboundHandler}
 import org.apache.commons.pool2.impl.{DefaultPooledObject, GenericObjectPool, GenericObjectPoolConfig}
 import org.apache.commons.pool2.{BasePooledObjectFactory, PooledObject}
 import org.objenesis.strategy.SerializingInstantiatorStrategy
 import org.slf4j.LoggerFactory
+import org.wulfnoth.gadus.rpc._
 
 import scala.collection.mutable
 import scala.language.postfixOps
@@ -48,32 +47,10 @@ class KryoRpcEngine extends RpcEngine {
   }
 
   /**
-    * 获取RPC Server端的服务实例
-    * @param address  绑定的本地地址
-    * @return RPC Server
-    */
-  override def getServer(address: InetSocketAddress): Server = new KryoRpcServer(address)
-
-  /**
     * Kryo RPC引擎的Server端，用于接收、处理Client端的RPC请求
     * @param address  RPC Server绑定的本地地址
     */
-  private class KryoRpcServer(address: InetSocketAddress) extends Server(address) {
-
-    private lazy val protocolNameInsMap = new mutable.HashMap[Class[_], (AnyRef, Array[Method])]
-
-    override def addProtocolAndInstance[T <: AnyRef](clazz: Class[T], instance: T): Boolean =
-      if (protocolNameInsMap contains clazz) false
-      else {
-        protocolNameInsMap += clazz -> (instance, clazz.getMethods.sorted)
-        /*protocolNameInsMap += clazz -> (instance, clazz.getMethods.sorted.map{
-          x => {
-            x.setAccessible(true)
-            x
-          }
-        })*/
-        true
-      }
+  private class KryoRpcServer(address: InetSocketAddress) extends RpcServerInScala(address) {
 
     override def getInitializer: ChannelInitializer[SocketChannel] = {
       new ChannelInitializer[SocketChannel] {
@@ -89,7 +66,7 @@ class KryoRpcEngine extends RpcEngine {
               }
 
               override def channelRead0(ctx: ChannelHandlerContext,
-                                        msg: KryoRequestWrapper) {
+                                        msg: KryoRequestWrapper)= ??? /*{
                 try {
                   val instanceAndMethod = getInstanceAndMethod(msg getProtocolClass, msg getMethodId)
                   val response = instanceAndMethod._2.invoke(instanceAndMethod._1, msg getRequestParameters: _*)
@@ -101,14 +78,11 @@ class KryoRpcEngine extends RpcEngine {
                     ctx writeAndFlush new KryoResponseWrapper(
                       null, msg getRequestId, e getCause)
                 }
-              }
+              }*/
             }
         }
       }
     }
-
-    def getInstanceAndMethod(clazz : Class[_], methodId: Int) =
-      (protocolNameInsMap(clazz)._1, protocolNameInsMap(clazz)._2.apply(methodId))
 
   }
 
@@ -142,6 +116,7 @@ class KryoRpcEngine extends RpcEngine {
 
     private val methods = {
       val tmp = new mutable.HashMap[Method, Int]()
+      import ImplicityInstance.methodOrder
       val ms = protocol.getMethods.sorted
       for (i <- ms.indices) {
         tmp += ms(i) -> i
@@ -174,6 +149,14 @@ class KryoRpcEngine extends RpcEngine {
       responseWrapper getResponse
     }
   }
+
+  /**
+    * 获取一个RPC服务端
+    *
+    * @param address 绑定的本地地址
+    * @return a RPC Server instance
+    */
+  override def getServer(address: InetSocketAddress, instance: scala.Any): RpcServer = ???
 }
 
 private object KryoRpcEngine {

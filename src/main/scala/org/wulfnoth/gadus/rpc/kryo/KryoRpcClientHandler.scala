@@ -1,7 +1,7 @@
-package com.young.gaduorhua.rpc.kryo
+package org.wulfnoth.gadus.rpc.kryo
 
-import com.young.gaduorhua.rpc.RpcInvocationHandler
 import io.netty.channel.{ChannelHandlerContext, SimpleChannelInboundHandler}
+import org.wulfnoth.gadus.rpc.RpcInvocationHandler
 
 /**
   * Created by cloud on 16-9-4.

@@ -1,4 +1,4 @@
-package com.young.gaduorhua.rpc.kryo
+package org.wulfnoth.gadus.rpc.kryo
 
 import java.io.ByteArrayOutputStream
 
@@ -9,20 +9,25 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToByteEncoder
 import org.apache.commons.pool2.impl.GenericObjectPool
 
+import scala.language.postfixOps
+
 /**
-  * Created by Young on 16-9-2.
+  * Created by Young on 16-9-4.
   */
-class KryoResponseEncoder(kryoPool : GenericObjectPool[Kryo])
-  extends MessageToByteEncoder[KryoResponseWrapper] {
+class KryoRequestEncoder(kryoPool : GenericObjectPool[Kryo]) extends
+  MessageToByteEncoder[KryoRequestWrapper]{
+
   override def encode(ctx: ChannelHandlerContext,
-                      msg: KryoResponseWrapper, out: ByteBuf) {
+                      msg: KryoRequestWrapper,
+                      out: ByteBuf) {
     val stream = new ByteArrayOutputStream
     val output = new Output(stream)
-    val kryo = kryoPool.borrowObject
+    val kryo = kryoPool borrowObject()
     kryo writeObject(output, msg)
     kryoPool returnObject kryo
     output flush()
-    out writeInt(stream size)
-    out writeBytes(stream toByteArray)
+    out writeInt stream.size
+    out writeBytes stream.toByteArray
   }
+
 }

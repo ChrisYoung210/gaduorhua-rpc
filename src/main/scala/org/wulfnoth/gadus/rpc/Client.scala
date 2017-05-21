@@ -1,4 +1,4 @@
-package com.young.gaduorhua.rpc
+package org.wulfnoth.gadus.rpc
 
 import java.net.InetSocketAddress
 import java.util.concurrent.atomic.AtomicInteger

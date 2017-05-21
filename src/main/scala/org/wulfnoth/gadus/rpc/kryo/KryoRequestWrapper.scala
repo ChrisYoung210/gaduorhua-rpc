@@ -1,4 +1,4 @@
-package com.young.gaduorhua.rpc.kryo
+package org.wulfnoth.gadus.rpc.kryo
 
 import scala.language.postfixOps
 
