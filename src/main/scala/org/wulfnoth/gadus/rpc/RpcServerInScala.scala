@@ -12,9 +12,7 @@ import io.netty.channel.{ChannelFuture, ChannelInitializer}
   * @author young
   */
 abstract class RpcServerInScala(address : InetSocketAddress,
-                      workerThreadN: Int = 8) extends RpcServer {
-
-  //def this(address: InetSocketAddress) = this(address, 8)
+                      workerThreadN: Int) extends RpcServer {
 
   private var channelFuture : ChannelFuture = _
 

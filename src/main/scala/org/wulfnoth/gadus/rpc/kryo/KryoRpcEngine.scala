@@ -1,16 +1,16 @@
 package org.wulfnoth.gadus.rpc.kryo
 
-import java.lang.reflect.{InvocationTargetException, Method, Proxy}
+import java.lang.reflect.{Method, Proxy}
 import java.net.InetSocketAddress
 
 import com.esotericsoftware.kryo.Kryo
-import com.young.commons.collection.BlockingHashMap
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.{ChannelHandlerContext, ChannelInitializer, SimpleChannelInboundHandler}
 import org.apache.commons.pool2.impl.{DefaultPooledObject, GenericObjectPool, GenericObjectPoolConfig}
 import org.apache.commons.pool2.{BasePooledObjectFactory, PooledObject}
 import org.objenesis.strategy.SerializingInstantiatorStrategy
 import org.slf4j.LoggerFactory
+import org.wulfnoth.gadus.commons.collection.BlockingTable
 import org.wulfnoth.gadus.rpc._
 
 import scala.collection.mutable
@@ -50,9 +50,10 @@ class KryoRpcEngine extends RpcEngine {
     * Kryo RPC引擎的Server端，用于接收、处理Client端的RPC请求
     * @param address  RPC Server绑定的本地地址
     */
-  private class KryoRpcServer(address: InetSocketAddress,
-                             instance: scala.Any)
-    extends RpcServerInScala(address) {
+  class KryoRpcServer(address: InetSocketAddress,
+                             instance: scala.Any,
+                             workerThreadN: Int)
+    extends RpcServerInScala(address, workerThreadN) {
 
     override def getInitializer: ChannelInitializer[SocketChannel] = {
       new ChannelInitializer[SocketChannel] {
@@ -118,19 +119,19 @@ class KryoRpcEngine extends RpcEngine {
     private val client = new KryoRpcClient(address, this)
     client.start
 
-    private val methods = {
-      val tmp = new mutable.HashMap[Method, Int]()
-      import ImplicityInstance.methodOrder
-      val ms = protocol.getMethods.sorted
-      for (i <- ms.indices) {
-        tmp += ms(i) -> i
-        //KryoRpcEngine.logger debug s"Inovker ${ms(i)}"
-      }
-      tmp
-    }
+	  private val methods = {
+		  val tmp = new mutable.HashMap[Method, Int]()
+		  import ImplicityInstance.methodOrder
+		  val ms = protocol.getMethods.sorted
+		  for (i <- ms.indices) {
+			  tmp += ms(i) -> i
+			  //KryoRpcEngine.logger debug s"Inovker ${ms(i)}"
+		  }
+		  tmp
+	  }
 
     private lazy val responses =
-      new BlockingHashMap[Long, KryoResponseWrapper](timeout)
+      new BlockingTable[Long, KryoResponseWrapper](timeout)
 
     def getResponse(requestId : Long) = responses get requestId
 
@@ -161,8 +162,9 @@ class KryoRpcEngine extends RpcEngine {
     * @return a RPC Server instance
     */
   override def getServer(address: InetSocketAddress,
-                         instance: scala.Any) =
-    new KryoRpcServer(address, instance)
+                         instance: scala.Any,
+						workerThreadN: Int) =
+    new KryoRpcServer(address, instance, workerThreadN)
 }
 
 private object KryoRpcEngine {

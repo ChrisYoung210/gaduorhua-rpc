@@ -23,6 +23,6 @@ public interface RpcEngine {
      * @param address 绑定的本地地址
      * @return a RPC Server instance
      */
-    RpcServer getServer(InetSocketAddress address, Object instance);
+    RpcServer getServer(InetSocketAddress address, Object instance, int workerThreadN);
 
 }

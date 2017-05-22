@@ -6,7 +6,7 @@
 
     <groupId>org.wulfnoth.gadus</groupId>
     <artifactId>gadus-rpc</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
 
     <build>
         <resources>
@@ -57,9 +57,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.young.gadus</groupId>
+            <groupId>org.wulfnoth.gadus</groupId>
             <artifactId>gadus-commons</artifactId>
-            <version>1.0</version>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>net.vidageek</groupId>
+            <artifactId>mirror</artifactId>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

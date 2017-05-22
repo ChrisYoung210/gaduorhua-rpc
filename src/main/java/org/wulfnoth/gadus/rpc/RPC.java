@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.wulfnoth.gadus.rpc.kryo.KryoRpcEngine;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.WeakHashMap;
 
 public class RPC {
 
@@ -16,6 +14,8 @@ public class RPC {
 
         private RpcServerBuilder(){}
 
+        private int workerThreadN = 8;
+
         private Object instance = null;
 
         private InetSocketAddress address = null;
@@ -23,6 +23,11 @@ public class RPC {
         private Class<? extends RpcEngine> clazz = null;
 
         private Class protocol = null;
+
+        public RpcServerBuilder setWorkerThreadNum(int workerThreadN) {
+            this.workerThreadN = workerThreadN;
+            return this;
+        }
 
         public RpcServerBuilder setInstance(Object instance) {
             this.instance = instance;
@@ -48,7 +53,7 @@ public class RPC {
             if (!protocol.isAssignableFrom(instance.getClass()))
                 throw new IllegalStateException("实例与协议类不匹配");
 
-            return RPCInScala$.MODULE$.getRpcEngine(clazz).getServer(address, instance);
+            return RPCInScala$.MODULE$.getRpcEngine(clazz).getServer(address, instance, workerThreadN);
         }
 
     }
