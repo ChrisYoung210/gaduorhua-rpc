@@ -23,7 +23,7 @@ class RPCTest {
 	def test(): Unit = {
 
 		val testRPC = RPC.getProxy(classOf[TestRPC], new InetSocketAddress("0.0.0.0", 9999))
-		0 until 10000000 foreach { x =>
+		0 until 1000 foreach { x =>
 			val v1 = Random.nextInt(100000000)
 			val v2 = Random.nextInt(100000000)
 			//println(v1 + v2)

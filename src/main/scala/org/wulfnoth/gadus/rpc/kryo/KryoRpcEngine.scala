@@ -176,7 +176,7 @@ private object KryoRpcPool {
 
 	lazy val serverPool = new GenericObjectPool[Kryo](new KryoPool, {
 		val config = new GenericObjectPoolConfig
-		println(s"notice at $getClass, line 206, the number of 20 should be changeable")
+		println(s"notice at $getClass, line 179, the number of 20 should be changeable")
 		config setMaxTotal 20
 		config
 	})
@@ -185,7 +185,7 @@ private object KryoRpcPool {
 
 	lazy val clientPool = new GenericObjectPool[Kryo](new KryoPool, {
 		val config = new GenericObjectPoolConfig
-		println(s"notice at $getClass, line 215, the number of 5 should be changeable")
+		println(s"notice at $getClass, line 188, the number of 5 should be changeable")
 		config setMaxTotal 5
 		config
 	})
