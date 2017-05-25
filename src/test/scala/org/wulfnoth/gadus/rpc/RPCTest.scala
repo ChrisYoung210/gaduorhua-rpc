@@ -11,19 +11,22 @@ import scala.util.Random
   */
 class RPCTest {
 
-	var server = RPC.getServerBuilder
+	val server = RPC.getServerBuilder
 		.address(new InetSocketAddress("0.0.0.0", 9999)).instance(new TestRPCImpl).build
+
+	var startTime = 0L
 
 	@Before
 	def startServer(): Unit = {
 		server.start
+		startTime = System.currentTimeMillis
 	}
 
 	@Test
 	def test(): Unit = {
 
 		val testRPC = RPC.getProxy(classOf[TestRPC], new InetSocketAddress("0.0.0.0", 9999))
-		0 until 1000 foreach { x =>
+		0 until 1000000 foreach { x =>
 			val v1 = Random.nextInt(100000000)
 			val v2 = Random.nextInt(100000000)
 			//println(v1 + v2)
@@ -41,6 +44,7 @@ class RPCTest {
 	@After
 	def close(): Unit = {
 		server.close()
+		println(System.currentTimeMillis - startTime)
 	}
 
 }

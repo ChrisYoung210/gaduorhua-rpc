@@ -15,6 +15,7 @@ import org.wulfnoth.gadus.commons.collection.BlockingTable
 import org.wulfnoth.gadus.rpc._
 
 import scala.collection.mutable
+import scala.concurrent.TimeoutException
 import scala.language.postfixOps
 /**
   * @author young
@@ -75,6 +76,7 @@ class KryoRpcEngine extends RPCEngine {
 
 							override def channelRead0(ctx: ChannelHandlerContext,
 													  msg: KryoRequestWrapper): Unit = {
+								KryoRpcEngine.logger debug s"${msg.requestId} ${System.currentTimeMillis()}"
 								val method = reflectionHandler method msg.methodName withArgs(msg.requestParameters.map(x => x.getClass): _*)
 								try {
 									val response = method invoke (instance, msg.requestParameters: _*)
@@ -123,7 +125,15 @@ class KryoRpcEngine extends RPCEngine {
 
 		private lazy val responses = new BlockingTable[Long, KryoResponseWrapper](timeout)
 
-		private def getResponse(requestId : Long) = responses get requestId
+		private def getResponse(requestId : Long) =
+			try {
+				responses get requestId
+			} catch {
+				case throwable: Throwable =>
+					KryoRpcEngine.logger error s"获得${requestId}的数据时，抛出异常"
+					throw throwable
+			}
+
 
 		override def putResponse(response: KryoResponseWrapper): Unit =
 			responses.put(response.requestId, response)
@@ -133,6 +143,7 @@ class KryoRpcEngine extends RPCEngine {
 							args: Array[AnyRef]): AnyRef = {
 			val requestId = client getNextRequestId
 			val requestWrapper = KryoRequestWrapper(method.getName, args, requestId)
+			KryoRpcEngine.logger debug s"$requestId ${System.currentTimeMillis()}"
 			client send requestWrapper
 			val responseWrapper = getResponse(requestId)
 			if (responseWrapper.throwable != null) {
@@ -142,6 +153,7 @@ class KryoRpcEngine extends RPCEngine {
 			}
 			responseWrapper.response
 		}
+
 	}
 
   /**
@@ -186,7 +198,7 @@ private object KryoRpcPool {
 	lazy val clientPool = new GenericObjectPool[Kryo](new KryoPool, {
 		val config = new GenericObjectPoolConfig
 		println(s"notice at $getClass, line 188, the number of 5 should be changeable")
-		config setMaxTotal 5
+		config setMaxTotal 8
 		config
 	})
 
