@@ -10,6 +10,6 @@
             <appender-ref ref="Console"/>
         </root>
         <Logger name="org.wulfnoth.gadus.rpc" level="info" />
-        <Logger name="org.wulfnoth.gadus.commons.collection" level="debug" />
+        <Logger name="org.wulfnoth.gadus.commons.collection" level="info" />
     </loggers>
 </configuration>
